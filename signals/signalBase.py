@@ -1,0 +1,80 @@
+import time
+from collections import deque
+
+class signalBase():
+    def __init__(self, maxHistorySize=32):
+        self.time = deque(maxlen=maxHistorySize)
+        self.value = deque(maxlen=maxHistorySize)
+
+    def getValueAtIndex(self, idx):
+        return self.value.get(idx,-1)
+
+    def addValue(self, val) -> None:
+        self.time.append(time.time())
+        self.value.append(val)
+
+    def append(self, val) -> None:
+        self.addValue(val)
+
+    def getAt(self, at):
+        return self.getValueClosestToTime(at)
+
+    def getValueClosestToTime(self, at):
+        if len(self.time) == 0:
+            return -1
+
+        if at < 0:
+            at += time.time() #< convert relative time to abs time
+
+        ### Future value does not exist yet
+        if at > self.time[-1]:
+            return self.value[-1]
+        
+        ### Too old, older than first data point
+        if at < self.time[0]:
+            return self.value[0]
+
+        ### Find closest value by absolute time
+        MAX_POSSIBLE_DT = time.time()
+        lastDt = MAX_POSSIBLE_DT
+        for i in range(len(self.time)):
+            dt = abs(at -self.time[i])
+            if dt < lastDt:
+                lastDt = dt
+            else:
+                return self.value[i -1]
+        return self.value[-1]
+        
+    def getValueInterpulatedAtTime(self, at):
+        raise NotImplementedError("Interpulation isn't implemented in the base class")
+
+if __name__ == "__main__":
+    import importlib.util, os, sys
+    mdl = ""
+    path = os.path.join("../unitTest", "test.py" )
+    #print(path)
+    spec = importlib.util.spec_from_file_location(mdl, path)
+    #print(spec)
+    ut = importlib.util.module_from_spec(spec)
+    sys.modules[mdl] = ut
+    spec.loader.exec_module(ut)
+
+    try:
+        import pysole
+    except:
+        pysole = False
+    if pysole:
+        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+    signal = signalBase(maxHistorySize=6)
+    Tst = time.time()
+    for i in range(4):
+        signal.append(i+1)
+        time.sleep(0.1)
+    Tend = time.time()
+    
+    ut.test("First element", 1, signal.getAt(Tst))
+    ut.test("Last element", 4, signal.getAt(Tend))
+    ut.test("Element at 0.12 sec", 2, signal.getAt(Tst +0.12))
+    ut.test("Element at 0.18 sec", 3, signal.getAt(Tst +0.18))
+    ut.test("Element at 0.28 sec", 3, signal.getAt(-0.22))
+    ut.test("Element at 0.3 sec",  4, signal.getAt(-0.1))
