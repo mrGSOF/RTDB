@@ -39,6 +39,7 @@ class RTDB(dict):
     
 if __name__ == "__main__":
     #import signals
+    import time
     from signals import *
 
     try:
@@ -49,9 +50,28 @@ if __name__ == "__main__":
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     rtdb = RTDB()
-    rtdb.addSignal("alt_m",   signalContinuous(maxHistorySize=48))
-    rtdb.addSignal("pitch_r", signalContinuous(maxHistorySize=48))
-    rtdb.addSignal("message", signalMessage(maxHistorySize=48))
-    rtdb.addSignal("state",   signalDiscrete(maxHistorySize=48))
+    rtdb.addSignal("alt_m",       signalContinuous(maxHistorySize=48))
+    rtdb.addSignal("pitch_r",     signalContinuous(maxHistorySize=48))
+    rtdb.addSignal("message_str", signalMessage(maxHistorySize=48))
+    rtdb.addSignal("state_enum",  signalDiscrete(maxHistorySize=48))
+    rtdb.addSignal("bus_struct",  signalMessage(maxHistorySize=48))
+
+    rtdb.resume()
+    rtdb["alt_m"].append(1000.0)
+    rtdb["state_enum"].append(1)
+    rtdb["message_str"].append("start")
+    time.sleep(0.1)
+
+    rtdb["alt_m"].append(1100.0)
+    rtdb["state_enum"].append(2)
+    rtdb["message_str"].append("mid")
+    time.sleep(0.1)
+    
+    rtdb["alt_m"].append(1200.0)
+    rtdb["state_enum"].append(3)
+    rtdb["message_str"].append("end")
+    rtdb["bus_struct"].append([1,2,3,4])
+    time.sleep(0.1)
+    
     rtdb.print()
     

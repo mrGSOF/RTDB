@@ -3,7 +3,7 @@ from collections import deque
 
 class signalBase():
     def __init__(self, maxHistorySize=32, typeName="Base", isPaused=None):
-        self.typeName = str(typeName)
+        self._typeName = str(typeName)
         self.time = deque(maxlen=maxHistorySize)
         self.value = deque(maxlen=maxHistorySize)
         self.isPaused = isPaused #< Reference to function
@@ -24,7 +24,7 @@ class signalBase():
         return len(self.time)
 
     def getType(self) -> str:
-        return self.typeName
+        return self._typeName
 
     def print(self):
         s = self.getTypeName() +"\n"
