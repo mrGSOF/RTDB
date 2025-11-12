@@ -1,5 +1,5 @@
 from signalBase import signalBase
 
-class signalDiscrete(signalBase):
+class signalMessage(signalBase):
     pass
 

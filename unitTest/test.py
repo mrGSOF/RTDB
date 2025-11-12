@@ -7,4 +7,4 @@ def test(title, expected, actual, tol=0):
         mark = "FAIL"
         equ = "!="
         
-    print("[%s] %s, Expected vs Actual (%1.1f %s %1.1f +/-%1.3f)"%(mark, title, expected, equ, actual, tol))
+    print("[%s] %s, Expected vs Actual (%1.3f %s %1.3f +/-%1.3f)"%(mark, title, expected, equ, actual, tol))

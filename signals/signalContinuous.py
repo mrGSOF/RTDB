@@ -1,38 +1,56 @@
 from signalBase import signalBase
 
 class signalContinuous(signalBase):
-    def __init__(self, degree=1):
+    def __init__(self, maxHistorySize=32, degree=1):
+        super().__init__(maxHistorySize)
         self.degree = 1
         
     def getAt(self, at):
-        return self.getValueInterpulatedAtTime(at)
+        return self.getValueInterpolatedAtTime(at)
 
-    def getValueInterpulatedAtTime(self, at):
+    def _intr(self, t0, t1, v0, v1, t):
+        slope = (v1 -v0)/(t1 -t0)
+        ### Past value extrapolation or mid value interpolation
+        if t > t1:
+            ### Future value extrapolation
+            v0 = v1
+            t0 = t1
+        return v0 +slope*(t -t0)
+
+    def getValueInterpolatedAtTime(self, at):
         if len(self.time) == 0:
             return -1
 
         if at < 0:
             at += time.time() #< convert relative time to abs time
 
-        ### Future value does not exist yet
-        if at > self.time[-1]:
-            return self.value[-1]
-        
-        ### Too old, older than first data point
-        if at < self.time[0]:
-            return self.value[0]
+        ### Future value extrapolation
+        if at >= self.time[-1]:
+            return self._intr(self.time[-2], self.time[-1],
+                              self.value[-2], self.value[-1],
+                              at)
 
-        ### Find closest value by absolute time
+        ### Past value extrapolation
+        if at <= self.time[0]:
+            return self._intr(self.time[0], self.time[1],
+                              self.value[0], self.value[1],
+                              at)
+
+        ### Mid value interpolation
         MAX_POSSIBLE_DT = time.time()
         lastDt = MAX_POSSIBLE_DT
-        for i in range(len(self.time)):
-            dt = abs(at -self.time[i])
-            if dt < lastDt:
-                lastDt = dt
-            else:
-                return self.value[i -1]
+        for i in range(len(self.time) -1):
+            if (at >= self.time[i]) and (at < self.time[i+1]):
+                return self._intr(self.time[i], self.time[i+1],
+                                  self.value[i], self.value[i+1],
+                                  at)
         return self.value[-1]
 
+    def print(self):
+        print("time|value")
+        for i in range(len(self.time)):
+            print("%1.3f | %1.3f"%(self.time[i], self.value[i]))
+            
 if __name__ == "__main__":
     import importlib.util, os, sys, time
     mdl = ""
@@ -51,15 +69,20 @@ if __name__ == "__main__":
     if pysole:
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
     signal = signalContinuous(maxHistorySize=6)
+
+    tol = 0.05
+    inc_per_dt = 0.5
+    dt = 0.5
     Tst = time.time()
     for i in range(4):
-        signal.append(i+1)
-        time.sleep(0.1)
-    Tend = time.time()
-    tol = 0.05
-    ut.test("First element", 1, signal.getAt(Tst), tol)
-    ut.test("Last element", 4, signal.getAt(Tend), tol)
-    ut.test("Element at 0.12 sec", 2, signal.getAt(Tst +0.12), tol)
-    ut.test("Element at 0.18 sec", 3, signal.getAt(Tst +0.18), tol)
-    ut.test("Element at 0.28 sec", 3, signal.getAt(-0.22), tol)
-    ut.test("Element at 0.3 sec",  4, signal.getAt(-0.1), tol)
+        signal.append(i*inc_per_dt)
+        time.sleep(dt)
+    Tend = time.time() -dt
+    ut.test("Element 0.1 sec ago",  1.4, signal.getAt(-0.1-dt), tol)
+    ut.test("Element 0.1 sec ago",  1.4, signal.getAt(Tend-0.1), tol)
+    ut.test("Element at -1.0 sec", -1,   signal.getAt(Tst -1.0), tol)
+    ut.test("Element at 0.0 sec",   0,   signal.getAt(Tst +0.0), tol)
+    ut.test("Element at 0.12 sec", 0.12, signal.getAt(Tst +0.12), tol)
+    ut.test("Element at 0.18 sec", 0.18, signal.getAt(Tst +0.18), tol)
+    ut.test("Element at 0.28 sec", 0.28, signal.getAt(Tst +0.28), tol)
+    signal.print()

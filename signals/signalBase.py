@@ -45,8 +45,8 @@ class signalBase():
                 return self.value[i -1]
         return self.value[-1]
         
-    def getValueInterpulatedAtTime(self, at):
-        raise NotImplementedError("Interpulation isn't implemented in the base class")
+    def getValueInterpolatedAtTime(self, at):
+        raise NotImplementedError("Interpolation isn't implemented in the base class")
 
 if __name__ == "__main__":
     import importlib.util, os, sys
