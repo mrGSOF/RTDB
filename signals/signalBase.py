@@ -49,12 +49,15 @@ class signalBase():
     def getAt(self, at):
         return self.getValueClosestToTime(at)
 
+    def getLatest(self):
+        return self.value[-1]
+
     def getValueClosestToTime(self, at):
         if len(self.time) == 0:
             return -1
 
         if at < 0:
-            at += time.time() #< convert relative time to abs time
+            at += self.getTime() #< convert relative time to abs time
 
         ### Future value does not exist yet
         if at > self.time[-1]:
