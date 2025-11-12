@@ -1,5 +1,12 @@
-### Real Time Data Base....
-### By: Guy Soffer (GSOF) 2025
+## By: Guy Soffer (GSOF) 11/Nov/2025
+__version__ = "1.0.0"
+__author__ = "Guy Soffer"
+__copyright__ = ""
+__credits__ = [""]
+__license__ = "MIT"
+__maintainer__ = ""
+__email__ = "gsoffer@yahoo.com"
+__status__ = "Development"
 
 import json
 
@@ -11,6 +18,7 @@ class RTDB(dict):
         self.resetTime()
 
     def print(self) -> None:
+        """Print the structure of the RTDB"""
         s = "RTDB contant:\n"
         for i, key in enumerate(self.keys()):
             sig = self[key]
@@ -23,15 +31,23 @@ class RTDB(dict):
         print("\n"+s)
         
     def pause(self) -> None:
+        """Disable all signals from new appendings"""
         self.pause = True
 
+    def resume(self) -> None:
+        """Enable all signals for new appendings"""
+        self.pause = False
+
     def isPaused(self) -> bool:
+        """Returns TRUE if the RTDB is paused from appending new values"""
         return self.pause
 
     def setGetTime(self, getTime) -> None:
-        self._getTime = getTime
+        """Set the time source of the RTDB"""
+        self._getTime = getTime #< Should return a number
 
     def resetTime(self) -> None:
+        """Reset the time stamp to zero. Should be called once and before first append"""
         if self.getTime != None:
             self.T0 = self._getTime()
         else:
@@ -39,15 +55,15 @@ class RTDB(dict):
             print("Time source isn't set")
 
     def getTime(self) -> float:
+        """Returns the RTDB current time (shared with all signals)"""
         return self._getTime() -self.T0
 
-    def resume(self) -> None:
-        self.pause = False
-
     def playback(dt) -> None:
+        """TBD"""
         self.pause = False
 
     def addSignal(self, name, signal) -> None:
+        """Add new signal object the RTDB"""
         signal.setIsPaused( self.isPaused ) #< All signals should monitor the RTDB's pause state
         signal.setGetTime( rtdb.getTime )   #< All signals should reference the RTDB's time source
         self[name] = signal
