@@ -45,11 +45,6 @@ class signalContinuous(signalBase):
                                   self.value[i], self.value[i+1],
                                   at)
         return self.value[-1]
-
-    def print(self):
-        print("time|value")
-        for i in range(len(self.time)):
-            print("%1.3f | %1.3f"%(self.time[i], self.value[i]))
             
 if __name__ == "__main__":
     import importlib.util, os, sys, time

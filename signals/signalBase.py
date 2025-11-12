@@ -6,6 +6,12 @@ class signalBase():
         self.time = deque(maxlen=maxHistorySize)
         self.value = deque(maxlen=maxHistorySize)
 
+
+    def print(self):
+        print("time|value")
+        for i in range(len(self.time)):
+            print("%1.3f | %1.3f"%(self.time[i], self.value[i]))
+
     def getValueAtIndex(self, idx):
         return self.value.get(idx,-1)
 
