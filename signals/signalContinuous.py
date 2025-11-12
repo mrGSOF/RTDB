@@ -1,12 +1,11 @@
-import time
 import sys, os.path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__))))
 from signalBase import signalBase
 
 class signalContinuous(signalBase):
-    def __init__(self, maxHistorySize=32, degree=1, isPaused=None):
-        super().__init__(maxHistorySize, "Continuous", isPaused)
+    def __init__(self, maxHistorySize=32, degree=1, isPaused=None, getTime=None):
+        super().__init__(maxHistorySize, "Continuous", isPaused, getTime)
         self._degree = 1
         
     def getAt(self, at):
@@ -41,7 +40,7 @@ class signalContinuous(signalBase):
                               at)
 
         ### Mid value interpolation
-        MAX_POSSIBLE_DT = time.time()
+        MAX_POSSIBLE_DT = self.getTime()
         lastDt = MAX_POSSIBLE_DT
         for i in range(len(self.time) -1):
             if (at >= self.time[i]) and (at < self.time[i+1]):
@@ -67,7 +66,7 @@ if __name__ == "__main__":
         pysole = False
     if pysole:
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
-    signal = signalContinuous(maxHistorySize=6)
+    signal = signalContinuous(maxHistorySize=6, getTime=time.time)
 
     tol = 0.05
     inc_per_dt = 0.5

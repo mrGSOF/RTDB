@@ -1,31 +1,43 @@
 ### Real Time Data Base....
 ### By: Guy Soffer (GSOF) 2025
+import time
 
 class RTDB(dict):
     def __init__(self):
         super().__init__()
+        self.T0 = time.time()
         self.pause()
 
     def print(self):
+        s = "RTDB contant:\n"
         for i, key in enumerate(self.keys()):
             sig = self[key]
-            print("%3d. %s (%s %d/%d)"%(i+1,
-                                        key,
-                                        sig.getType(),
-                                        sig.getLen(),
-                                        sig.getMaxLen()
-                                        ))
+            s += "%3d. %s (%s %d/%d)\n"%(i+1,
+                                         key,
+                                         sig.getType(),
+                                         sig.getLen(),
+                                         sig.getMaxLen()
+                                         )
+        print("\n"+s)
+        
     def pause(self):
         self.pause = True
         
     def isPaused(self) -> bool:
         return self.pause
 
+    def getTime(self) -> float:
+        return time.time() -self.T0
+
     def resume(self):
         self.pause = False
 
+    def playback(dt):
+        self.pause = False
+
     def addSignal(self, name, signal) -> None:
-        signal.isPaused = self.isPaused #< All signals should monitor the RTDB's pause state 
+        signal.isPaused = self.isPaused #< All signals should monitor the RTDB's pause state
+        signal.getTime = rtdb.getTime
         self[name] = signal
 
     def load(self, filename) -> bool:
@@ -36,7 +48,7 @@ class RTDB(dict):
 
     def exportToHdf5(self, filename) -> bool:
         return False
-    
+
 if __name__ == "__main__":
     #import signals
     import time
@@ -74,4 +86,5 @@ if __name__ == "__main__":
     time.sleep(0.1)
     
     rtdb.print()
+    rtdb["alt_m"].print()
     

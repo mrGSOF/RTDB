@@ -4,6 +4,6 @@ sys.path.append(
 from signalBase import signalBase
 
 class signalDiscrete(signalBase):
-    def __init__(self, maxHistorySize=32, isPaused=None):
-        super().__init__(maxHistorySize, "Discrete", isPaused)
+    def __init__(self, maxHistorySize=32, isPaused=None, getTime=None):
+        super().__init__(maxHistorySize, "Discrete", isPaused, getTime)
 

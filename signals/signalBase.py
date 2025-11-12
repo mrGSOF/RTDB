@@ -1,12 +1,19 @@
-import time
 from collections import deque
 
 class signalBase():
-    def __init__(self, maxHistorySize=32, typeName="Base", isPaused=None):
+    def __init__(self, maxHistorySize=32, typeName="Base", isPaused=None, getTime=None):
         self._typeName = str(typeName)
         self.time = deque(maxlen=maxHistorySize)
         self.value = deque(maxlen=maxHistorySize)
         self.isPaused = isPaused #< Reference to function
+        self.getTime = getTime   #< Reference to system time
+
+    def print(self):
+        s = "Type: %s\n"%(self._typeName)
+        s += "time | value\n"
+        for i in range(len(self.time)):
+            s += "%1.3f | %1.3f\n"%(self.time[i], self.value[i])
+        print("\n"+s)
 
     def _isPaused(self) -> bool:
         if (self.isPaused == None):
@@ -26,19 +33,12 @@ class signalBase():
     def getType(self) -> str:
         return self._typeName
 
-    def print(self):
-        s = self.getTypeName() +"\n"
-        s += "time | value\n"
-        for i in range(len(self.time)):
-            s += "%1.3f | %1.3f\n"%(self.time[i], self.value[i])
-        print(s)
-
     def getValueAtIndex(self, idx):
         return self.value.get(idx,-1)
 
     def append(self, val) -> None:
         if not self._isPaused():
-            self._addValue(time.time(), val)
+            self._addValue(self.getTime(), val)
 
     def getAt(self, at):
         return self.getValueClosestToTime(at)
@@ -59,7 +59,7 @@ class signalBase():
             return self.value[0]
 
         ### Find closest value by absolute time
-        MAX_POSSIBLE_DT = time.time()
+        MAX_POSSIBLE_DT = self.getTime()
         lastDt = MAX_POSSIBLE_DT
         for i in range(len(self.time)):
             dt = abs(at -self.time[i])
@@ -73,7 +73,7 @@ class signalBase():
         raise NotImplementedError("Interpolation isn't implemented in the base class")
 
 if __name__ == "__main__":
-    import importlib.util, os, sys
+    import importlib.util, os, sys, time
     mdl = ""
     path = os.path.join("../unitTest", "test.py" )
     #print(path)
@@ -89,7 +89,7 @@ if __name__ == "__main__":
         pysole = False
     if pysole:
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
-    signal = signalBase(maxHistorySize=6)
+    signal = signalBase(maxHistorySize=6, getTime=time.time)
     Tst = time.time()
     for i in range(4):
         signal.append(i+1)
@@ -102,3 +102,4 @@ if __name__ == "__main__":
     ut.test("Element at 0.18 sec", 3, signal.getAt(Tst +0.18))
     ut.test("Element at 0.28 sec", 3, signal.getAt(-0.22))
     ut.test("Element at 0.3 sec",  4, signal.getAt(-0.1))
+    signal.print()
