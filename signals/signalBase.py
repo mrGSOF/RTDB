@@ -2,25 +2,43 @@ import time
 from collections import deque
 
 class signalBase():
-    def __init__(self, maxHistorySize=32):
+    def __init__(self, maxHistorySize=32, typeName="Base", isPaused=None):
+        self.typeName = str(typeName)
         self.time = deque(maxlen=maxHistorySize)
         self.value = deque(maxlen=maxHistorySize)
+        self.isPaused = isPaused #< Reference to function
 
+    def _isPaused(self) -> bool:
+        if (self.isPaused == None):
+            return False
+        return self.isPaused()
+        
+    def _addValue(self, time, val) -> None:
+        self.time.append(time)
+        self.value.append(val)
+
+    def getMaxLen(self) -> int:
+        return self.time.maxlen
+
+    def getLen(self) -> int:
+        return len(self.time)
+
+    def getType(self) -> str:
+        return self.typeName
 
     def print(self):
-        print("time|value")
+        s = self.getTypeName() +"\n"
+        s += "time | value\n"
         for i in range(len(self.time)):
-            print("%1.3f | %1.3f"%(self.time[i], self.value[i]))
+            s += "%1.3f | %1.3f\n"%(self.time[i], self.value[i])
+        print(s)
 
     def getValueAtIndex(self, idx):
         return self.value.get(idx,-1)
 
-    def addValue(self, val) -> None:
-        self.time.append(time.time())
-        self.value.append(val)
-
     def append(self, val) -> None:
-        self.addValue(val)
+        if not self._isPaused():
+            self._addValue(time.time(), val)
 
     def getAt(self, at):
         return self.getValueClosestToTime(at)

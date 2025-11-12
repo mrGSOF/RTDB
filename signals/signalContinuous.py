@@ -5,8 +5,8 @@ sys.path.append(
 from signalBase import signalBase
 
 class signalContinuous(signalBase):
-    def __init__(self, maxHistorySize=32, degree=1):
-        super().__init__(maxHistorySize)
+    def __init__(self, maxHistorySize=32, degree=1, isPaused=None):
+        super().__init__(maxHistorySize, "Continuous", isPaused)
         self.degree = 1
         
     def getAt(self, at):

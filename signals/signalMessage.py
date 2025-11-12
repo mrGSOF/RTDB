@@ -4,5 +4,6 @@ sys.path.append(
 from signalBase import signalBase
 
 class signalMessage(signalBase):
-    pass
+    def __init__(self, maxHistorySize=32, isPaused=None):
+        super().__init__(maxHistorySize, "Message", isPaused)
 
