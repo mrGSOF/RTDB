@@ -1,0 +1,10 @@
+{
+"alt_m": {"type": "Continuous", "maxSize": 32},
+"pitch_r": {"type": "Continuous", "maxSize": 32},
+"roll_r": {"type": "Continuous", "maxSize": 32},
+"heading_r": {"type": "Continuous", "maxSize": 32},
+"message_str": {"type": "Message", "maxSize": 32},
+"state_enum": {"type": "Discrete", "maxSize": 32},
+"bus_struct": {"type": "Message", "maxSize": 32},
+"frame_jpg": {"type": "Message", "maxSize": 32}
+}

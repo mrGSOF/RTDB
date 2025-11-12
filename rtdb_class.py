@@ -1,6 +1,8 @@
 ### Real Time Data Base....
 ### By: Guy Soffer (GSOF) 2025
 
+import json
+
 class RTDB(dict):
     def __init__(self, getTime=None):
         super().__init__()
@@ -52,12 +54,30 @@ class RTDB(dict):
 
     def loadJson(self, filename) -> bool:
         """Load and init a saved RTDB structure without the data"""
-        return False
+        # Opening and reading the JSON file
+        with open(filename, 'r') as f:
+            # Parsing the JSON file into a Python dictionary
+            rtdb_json = json.load(f)
 
+        for sigName in rtdb_json.keys():
+            sig = rtdb_json[sigName]
+            maxSize = sig["maxSize"]
+            if sig["type"] == "Continuous":
+                signal = signalContinuous(maxHistorySize=maxSize)
+            elif sig["type"] == "Discrete":
+                signal = signalDiscrete(maxHistorySize=maxSize)
+            elif sig["type"] == "Message":
+                signal = signalMessage(maxHistorySize=maxSize)
+            else:
+                signal = signalBase(maxHistorySize=maxSize)
+            self.addSignal(sigName, signal)
+        print("Append to RTDB from file <%s>"%(filename))
+    
     def saveJson(self, filename) -> bool:
         """Save the RTDB structure without the data"""
         with open(filename, "w", encoding="utf-8") as f:
             f.write(self.getJson())
+        print("RTDB saved to file <%s>"%(filename))
 
     def getJson(self) -> str:
         """Return the JSON string of the RTDB structure without the data"""
@@ -116,5 +136,8 @@ if __name__ == "__main__":
     rtdb.print()
     rtdb["alt_m"].print()
     print(rtdb.getJson())
-    rtdb.saveJson("rtdb_utest.json")
+    rtdb.saveJson("rtdb_save.json")
     
+    rtdb = RTDB(time.time)
+    rtdb.loadJson("./unitTest/rtdb_load.json")
+    rtdb.print()
