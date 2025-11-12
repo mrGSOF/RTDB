@@ -1,14 +1,14 @@
 ### Real Time Data Base....
 ### By: Guy Soffer (GSOF) 2025
-import time
 
 class RTDB(dict):
-    def __init__(self):
+    def __init__(self, getTime=None):
         super().__init__()
-        self.T0 = time.time()
         self.pause()
+        self.setGetTime(getTime)
+        self.resetTime()
 
-    def print(self):
+    def print(self) -> None:
         s = "RTDB contant:\n"
         for i, key in enumerate(self.keys()):
             sig = self[key]
@@ -20,19 +20,29 @@ class RTDB(dict):
                                          )
         print("\n"+s)
         
-    def pause(self):
+    def pause(self) -> None:
         self.pause = True
-        
+
     def isPaused(self) -> bool:
         return self.pause
 
-    def getTime(self) -> float:
-        return time.time() -self.T0
+    def setGetTime(self, getTime) -> None:
+        self._getTime = getTime
 
-    def resume(self):
+    def resetTime(self) -> None:
+        if self.getTime != None:
+            self.T0 = self._getTime()
+        else:
+            self.T0 = 0.0
+            print("Time source isn't set")
+
+    def getTime(self) -> float:
+        return self._getTime() -self.T0
+
+    def resume(self) -> None:
         self.pause = False
 
-    def playback(dt):
+    def playback(dt) -> None:
         self.pause = False
 
     def addSignal(self, name, signal) -> None:
@@ -64,7 +74,7 @@ if __name__ == "__main__":
     if pysole:
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
-    rtdb = RTDB()
+    rtdb = RTDB(time.time)
     rtdb.addSignal("alt_m",       signalContinuous(maxHistorySize=48))
     rtdb.addSignal("pitch_r",     signalContinuous(maxHistorySize=48))
     rtdb.addSignal("message_str", signalMessage(maxHistorySize=48))
