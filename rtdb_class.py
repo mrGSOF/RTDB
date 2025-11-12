@@ -51,12 +51,27 @@ class RTDB(dict):
         self[name] = signal
 
     def loadJson(self, filename) -> bool:
-        """Save the RTDB structure without the data"""
+        """Load and init a saved RTDB structure without the data"""
         return False
 
     def saveJson(self, filename) -> bool:
-        """Load and init a saved RTDB structure without the data"""
-        return False
+        """Save the RTDB structure without the data"""
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(self.getJson())
+
+    def getJson(self) -> str:
+        """Return the JSON string of the RTDB structure without the data"""
+        signals = self.keys()
+        signalsN = len(signals)
+        s = '{\n' #< Start of JSON string
+        for i, key in enumerate(signals):
+            sig = self[key]
+            s += '"%s": {"type": "%s", "maxSize": %d}'%(key, sig.getType(), sig.getMaxLen())
+            if i < (signalsN -1):
+                s += ','
+            s += '\n'
+        s += '}\n'
+        return s
 
     def exportToHdf5(self, filename) -> bool:
         """Save the RTDB structure and data"""
@@ -100,4 +115,6 @@ if __name__ == "__main__":
     
     rtdb.print()
     rtdb["alt_m"].print()
+    print(rtdb.getJson())
+    rtdb.saveJson("rtdb_utest.json")
     
