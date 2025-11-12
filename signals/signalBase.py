@@ -5,8 +5,8 @@ class signalBase():
         self._typeName = str(typeName)
         self.time = deque(maxlen=maxHistorySize)
         self.value = deque(maxlen=maxHistorySize)
-        self.isPaused = isPaused #< Reference to function
-        self.getTime = getTime   #< Reference to system time
+        self.setIsPaused(isPaused) #< Reference to function
+        self.setGetTime(getTime)   #< Reference to system time
 
     def print(self):
         s = "Type: %s\n"%(self._typeName)
@@ -15,10 +15,16 @@ class signalBase():
             s += "%1.3f | %1.3f\n"%(self.time[i], self.value[i])
         print("\n"+s)
 
-    def _isPaused(self) -> bool:
-        if (self.isPaused == None):
+    def setIsPaused(self, isPaused):
+        self._isPaused = isPaused
+
+    def setGetTime(self, getTime):
+        self.getTime = getTime
+
+    def isPaused(self) -> bool:
+        if (self._isPaused == None):
             return False
-        return self.isPaused()
+        return self._isPaused()
         
     def _addValue(self, time, val) -> None:
         self.time.append(time)
@@ -37,7 +43,7 @@ class signalBase():
         return self.value.get(idx,-1)
 
     def append(self, val) -> None:
-        if not self._isPaused():
+        if not self.isPaused():
             self._addValue(self.getTime(), val)
 
     def getAt(self, at):

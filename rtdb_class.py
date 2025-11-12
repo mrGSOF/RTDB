@@ -36,17 +36,20 @@ class RTDB(dict):
         self.pause = False
 
     def addSignal(self, name, signal) -> None:
-        signal.isPaused = self.isPaused #< All signals should monitor the RTDB's pause state
-        signal.getTime = rtdb.getTime
+        signal.setIsPaused( self.isPaused ) #< All signals should monitor the RTDB's pause state
+        signal.setGetTime( rtdb.getTime )   #< All signals should reference the RTDB's time source
         self[name] = signal
 
-    def load(self, filename) -> bool:
+    def loadJson(self, filename) -> bool:
+        """Save the RTDB structure without the data"""
         return False
 
-    def save(self, filename) -> bool:
+    def saveJson(self, filename) -> bool:
+        """Load and init a saved RTDB structure without the data"""
         return False
 
     def exportToHdf5(self, filename) -> bool:
+        """Save the RTDB structure and data"""
         return False
 
 if __name__ == "__main__":
