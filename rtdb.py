@@ -2,7 +2,7 @@
 __version__ = "1.0.0"
 __author__ = "Guy Soffer"
 __copyright__ = ""
-__credits__ = [""]
+__credits__ = ["Tzur Soffer"]
 __license__ = "MIT"
 __maintainer__ = ""
 __email__ = "gsoffer@yahoo.com"
@@ -19,7 +19,7 @@ class RTDB(dict):
 
     def print(self) -> None:
         """Print the structure of the RTDB"""
-        s = "RTDB contant:\n"
+        s = "RTDB content:\n"
         for i, key in enumerate(self.keys()):
             sig = self[key]
             s += "%3d. %s (%s %d/%d)\n"%(i+1,
@@ -31,11 +31,11 @@ class RTDB(dict):
         print("\n"+s)
         
     def pause(self) -> None:
-        """Disable all signals from new appendings"""
+        """Disable all signals from new appending"""
         self.pause = True
 
     def resume(self) -> None:
-        """Enable all signals for new appendings"""
+        """Enable all signals for new appending"""
         self.pause = False
 
     def isPaused(self) -> bool:
@@ -58,7 +58,7 @@ class RTDB(dict):
         """Returns the RTDB current time (shared with all signals)"""
         return self._getTime() -self.T0
 
-    def playback(dt) -> None:
+    def playback(self, dt) -> None:
         """TBD"""
         self.pause = False
 
