@@ -19,7 +19,7 @@ class RTDB(dict):
 
     def print(self) -> None:
         """Print the structure of the RTDB"""
-        s = "RTDB contant:\n"
+        s = "RTDB content:\n"
         for i, key in enumerate(self.keys()):
             sig = self[key]
             s += "%3d. %s (%s %d/%d)\n"%(i+1,
