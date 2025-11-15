@@ -34,11 +34,15 @@ class RTDB():
 
     def getSignal(self, name):
         """Return a reference to the signal object"""
-        return self._signals[name]
+        return self._signals.get(name, None)
 
     def __getitem__(self, name):
         """Return a reference to the signal object"""
         return self.getSignal(name)
+
+    def isSignalExists(self, name) -> bool:
+        """Return True if signal name exists in RTDB"""
+        return name in self.signals()
 
     def signals(self) -> list:
         """Return the list of signals names"""
@@ -245,3 +249,9 @@ if __name__ == "__main__":
     rtdb = RTDB(getTime=time.time)
     rtdb.loadJson("./unitTest/rtdb_load.json")
     rtdb.print()
+
+    if None == rtdb["new"]:
+        print("Signal not exists return None - passed")
+
+    if False == rtdb.isSignalExists("new"):
+        print("Signal not isSignalExists() return False - passed")
