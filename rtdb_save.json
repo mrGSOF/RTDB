@@ -1,4 +1,5 @@
 {
+"name": "DEMO",
 "alt_m": {"type": "Continuous", "maxSize": 48},
 "pitch_r": {"type": "Continuous", "maxSize": 48},
 "message_str": {"type": "Message", "maxSize": 48},

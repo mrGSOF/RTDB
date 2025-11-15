@@ -1,4 +1,5 @@
 {
+"name": "Loaded",
 "alt_m": {"type": "Continuous", "maxSize": 32},
 "pitch_r": {"type": "Continuous", "maxSize": 32},
 "roll_r": {"type": "Continuous", "maxSize": 32},

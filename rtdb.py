@@ -10,17 +10,44 @@ __status__ = "Development"
 
 import json
 
-class RTDB(dict):
-    def __init__(self, getTime=None):
-        super().__init__()
+class RTDB():
+    def __init__(self, name="noname", getTime=None):
+        self.name = name
         self.pause()
         self.setGetTime(getTime)
         self.resetTime()
+        self._signals = {}
+
+    def addSignal(self, name, signal) -> None:
+        """Add new signal object the RTDB"""
+        signal.setIsPaused( self.isPaused ) #< All signals should monitor the RTDB's pause state
+        signal.setGetTime( rtdb.getTime )   #< All signals should reference the RTDB's time source
+        self._signals[name] = signal
+    
+    def __setitem__(self, name, signal) -> None:
+        """Add new signal object the RTDB"""
+        self.addSignal(name, signal)
+        
+    def getSignal(self, name):
+        """Return a reference to the signal object"""
+        return self._signals[name]
+
+    def __getitem__(self, name):
+        """Return a reference to the signal object"""
+        return self.getSignal(name)
+
+    def signals(self) -> list:
+        """Return the list of signals names"""
+        return self._signals.keys()
+
+    def size(self) -> int:
+        """Return the number of signals in the RTDB"""
+        return len(self._signals)
 
     def print(self) -> None:
         """Print the structure of the RTDB"""
-        s = "RTDB content:\n"
-        for i, key in enumerate(self.keys()):
+        s = "RTDB (%s) content:\n"%(self.name)
+        for i, key in enumerate(self.signals()):
             sig = self[key]
             s += "%3d. %s (%s %d/%d)\n"%(i+1,
                                          key,
@@ -62,12 +89,6 @@ class RTDB(dict):
         """TBD"""
         self.pause = False
 
-    def addSignal(self, name, signal) -> None:
-        """Add new signal object the RTDB"""
-        signal.setIsPaused( self.isPaused ) #< All signals should monitor the RTDB's pause state
-        signal.setGetTime( rtdb.getTime )   #< All signals should reference the RTDB's time source
-        self[name] = signal
-
     def loadJson(self, filename) -> bool:
         """Load and init a saved RTDB structure without the data"""
         # Opening and reading the JSON file
@@ -77,16 +98,19 @@ class RTDB(dict):
 
         for sigName in rtdb_json.keys():
             sig = rtdb_json[sigName]
-            maxSize = sig["maxSize"]
-            if sig["type"] == "Continuous":
-                signal = signalContinuous(maxHistorySize=maxSize)
-            elif sig["type"] == "Discrete":
-                signal = signalDiscrete(maxHistorySize=maxSize)
-            elif sig["type"] == "Message":
-                signal = signalMessage(maxHistorySize=maxSize)
+            if sigName == "name":
+                self.name = sig
             else:
-                signal = signalBase(maxHistorySize=maxSize)
-            self.addSignal(sigName, signal)
+                maxSize = sig["maxSize"]
+                if sig["type"] == "Continuous":
+                    signal = signalContinuous(maxHistorySize=maxSize)
+                elif sig["type"] == "Discrete":
+                    signal = signalDiscrete(maxHistorySize=maxSize)
+                elif sig["type"] == "Message":
+                    signal = signalMessage(maxHistorySize=maxSize)
+                else:
+                    signal = signalBase(maxHistorySize=maxSize)
+                self.addSignal(sigName, signal)
         print("Append to RTDB from file <%s>"%(filename))
     
     def saveJson(self, filename) -> bool:
@@ -97,10 +121,10 @@ class RTDB(dict):
 
     def getJson(self) -> str:
         """Return the JSON string of the RTDB structure without the data"""
-        signals = self.keys()
-        signalsN = len(signals)
+        signalsN = self.size()
         s = '{\n' #< Start of JSON string
-        for i, key in enumerate(signals):
+        s += '"name": "%s",\n'%(str(self.name))
+        for i, key in enumerate(self.signals()):
             sig = self[key]
             s += '"%s": {"type": "%s", "maxSize": %d}'%(key, sig.getType(), sig.getMaxLen())
             if i < (signalsN -1):
@@ -122,16 +146,17 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-    if pysole:
-        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+#    if pysole:
+#        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
-    rtdb = RTDB(time.time)
+    rtdb = RTDB(name="DEMO", getTime=time.time)
     rtdb.addSignal("alt_m",       signalContinuous(maxHistorySize=48))
     rtdb.addSignal("pitch_r",     signalContinuous(maxHistorySize=48))
     rtdb.addSignal("message_str", signalMessage(maxHistorySize=48))
     rtdb.addSignal("state_enum",  signalDiscrete(maxHistorySize=48))
     rtdb.addSignal("bus_struct",  signalMessage(maxHistorySize=48))
-
+    rtdb.print()
+    
     rtdb.resume()
     rtdb["alt_m"].append(1000.0)
     rtdb["state_enum"].append(1)
@@ -154,6 +179,6 @@ if __name__ == "__main__":
     print(rtdb.getJson())
     rtdb.saveJson("rtdb_save.json")
     
-    rtdb = RTDB(time.time)
+    rtdb = RTDB(getTime=time.time)
     rtdb.loadJson("./unitTest/rtdb_load.json")
     rtdb.print()
