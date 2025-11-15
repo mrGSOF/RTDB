@@ -10,6 +10,9 @@ __status__ = "Development"
 
 import json
 
+def addFileExtention(filename, ext) -> str:
+    return filename
+
 class RTDB():
     def __init__(self, name="noname", getTime=None):
         self.name = name
@@ -21,13 +24,14 @@ class RTDB():
     def addSignal(self, name, signal) -> None:
         """Add new signal object the RTDB"""
         signal.setIsPaused( self.isPaused ) #< All signals should monitor the RTDB's pause state
-        signal.setGetTime( rtdb.getTime )   #< All signals should reference the RTDB's time source
+        signal.setGetTime( self.getTime )   #< All signals should reference the RTDB's time source
         self._signals[name] = signal
-    
+
     def __setitem__(self, name, signal) -> None:
         """Add new signal object the RTDB"""
+        self._signals[name]
         self.addSignal(name, signal)
-        
+
     def getSignal(self, name):
         """Return a reference to the signal object"""
         return self._signals[name]
@@ -40,6 +44,14 @@ class RTDB():
         """Return the list of signals names"""
         return self._signals.keys()
 
+    def list(self) -> list:
+        """Return the list of signals names"""
+        return self.signals()
+
+    def keys(self) -> list:
+        """Return the list of signals names"""
+        return self.signals()
+
     def size(self) -> int:
         """Return the number of signals in the RTDB"""
         return len(self._signals)
@@ -48,7 +60,7 @@ class RTDB():
         """Print the structure of the RTDB"""
         s = "RTDB (%s) content:\n"%(self.name)
         for i, key in enumerate(self.signals()):
-            sig = self[key]
+            sig = self.getSignal(key)
             s += "%3d. %s (%s %d/%d)\n"%(i+1,
                                          key,
                                          sig.getType(),
@@ -57,13 +69,15 @@ class RTDB():
                                          )
         print("\n"+s)
         
-    def pause(self) -> None:
+    def pause(self):
         """Disable all signals from new appending"""
         self.pause = True
+        return self
 
-    def resume(self) -> None:
+    def resume(self):
         """Enable all signals for new appending"""
         self.pause = False
+        return self
 
     def isPaused(self) -> bool:
         """Returns TRUE if the RTDB is paused from appending new values"""
@@ -87,6 +101,7 @@ class RTDB():
 
     def playback(self, dt) -> None:
         """TBD"""
+        raise NotImplementedError("Playback isn't implemented yet")
         self.pause = False
 
     def loadJson(self, filename) -> bool:
@@ -115,6 +130,7 @@ class RTDB():
     
     def saveJson(self, filename) -> bool:
         """Save the RTDB structure without the data"""
+        filename = addFileExtention(filename, "json")
         with open(filename, "w", encoding="utf-8") as f:
             f.write(self.getJson())
         print("RTDB saved to file <%s>"%(filename))
@@ -133,9 +149,54 @@ class RTDB():
         s += '}\n'
         return s
 
-    def exportToHdf5(self, filename) -> bool:
+    def getStateHdf5(self):
+        """TBD"""
+        raise NotImplementedError("HDF5 support isn't implemented yet")
+
+    def saveStateHdf5(self, filename) -> bool:
         """Save the RTDB structure and data"""
-        return False
+        try:
+            filename = addFileExtention(filename, "csv")
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(self.getStateHdf5)
+            print("RTDB saved to file <%s>"%(filename))
+            return True
+        except:
+            print("Error: RTDB wasn't saved to <%s>"%(filename))
+            return False
+
+    def getStateCsv(self) -> str:
+        """Save the RTDB structure and data"""
+        maxSamples = 0
+        csv = ""
+        for sig in self.list():
+            csv += "%s_s, %s_v, "%(sig, sig)
+            sigSamples = self.getSignal(sig).getLen()
+            if maxSamples < sigSamples:
+                maxSamples = sigSamples
+        csv += "\n"
+        for i in range(maxSamples):
+            for sig in self.list():
+                signal = self.getSignal(sig)
+                if i < signal.getLen():
+                    csv += "%1.6f, %s, "%(signal.time[i], str(signal.value[i]))
+                else:
+                    csv += ", , "
+            csv += "\n"
+        return csv
+
+    def saveStateCsv(self, filename) -> bool:
+        """Save the RTDB structure and data"""
+        try:
+            filename = addFileExtention(filename, "csv")
+            with open(filename, "w", encoding="utf-8") as f:
+                f.write(self.getStateCsv())
+            print("RTDB saved to file <%s>"%(filename))
+            return True
+        except:
+            print("Error: RTDB wasn't saved to <%s>"%(filename))
+            return False
+            
 
 if __name__ == "__main__":
     #import signals
@@ -175,6 +236,8 @@ if __name__ == "__main__":
     time.sleep(0.1)
     
     rtdb.print()
+    rtdb.saveStateCsv("rtdb.csv")
+    
     rtdb["alt_m"].print()
     print(rtdb.getJson())
     rtdb.saveJson("rtdb_save.json")

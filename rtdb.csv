@@ -1,0 +1,4 @@
+alt_m_s, alt_m_v, pitch_r_s, pitch_r_v, message_str_s, message_str_v, state_enum_s, state_enum_v, bus_struct_s, bus_struct_v, 
+0.023043, 1000.0, , , 0.023062, start, 0.023056, 1, 0.224391, [1, 2, 3, 4], 
+0.123500, 1100.0, , , 0.123514, mid, 0.123509, 2, , , 
+0.224376, 1200.0, , , 0.224385, end, 0.224381, 3, , , 

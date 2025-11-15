@@ -49,6 +49,9 @@ class signalBase():
     def getType(self) -> str:
         return self._typeName
 
+    def getHistory(self, stIdx=0, endIdx=-1):
+        return dict(zip(self.time[stIdx, self.endIdx], self.value[stIdx, self.endIdx]))
+    
     def getValueAtIndex(self, idx):
         return self.value.get(idx,-1)
 
