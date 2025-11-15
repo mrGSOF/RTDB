@@ -211,8 +211,8 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-#    if pysole:
-#        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+    if pysole:
+        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     rtdb = RTDB(name="DEMO", getTime=time.time)
     rtdb.addSignal("alt_m",       signalContinuous(maxHistorySize=48))
@@ -241,7 +241,10 @@ if __name__ == "__main__":
     
     rtdb.print()
     rtdb.saveStateCsv("rtdb.csv")
-    
+
+    print(rtdb["message_str"].getHistory())
+    print(rtdb["message_str"].getHistory(stIdx=0, endIdx=1))
+        
     rtdb["alt_m"].print()
     print(rtdb.getJson())
     rtdb.saveJson("rtdb_save.json")

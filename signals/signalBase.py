@@ -50,7 +50,10 @@ class signalBase():
         return self._typeName
 
     def getHistory(self, stIdx=0, endIdx=-1):
-        return dict(zip(self.time[stIdx, self.endIdx], self.value[stIdx, self.endIdx]))
+        if endIdx == -1:
+            endIdx = self.getLen()
+        #return type(self)(itertools.islice(self, stIdx, endIdx, 1))
+        return list(zip(list(self.time)[stIdx:endIdx], list(self.value)[stIdx:endIdx]))
     
     def getValueAtIndex(self, idx):
         return self.value.get(idx,-1)
@@ -109,8 +112,9 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-    if pysole:
-        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+#    if pysole:
+#        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+
     signal = signalBase(maxHistorySize=6, getTime=time.time)
     Tst = time.time()
     for i in range(4):
@@ -125,3 +129,8 @@ if __name__ == "__main__":
     ut.test("Element at 0.28 sec", 3, signal.getAt(-0.22))
     ut.test("Element at 0.3 sec",  4, signal.getAt(-0.1))
     signal.print()
+
+    print(signal.getHistory())
+    #print(hist[0])
+    #print(hist[1])
+    print(signal.getHistory(stIdx=0, endIdx=1))
