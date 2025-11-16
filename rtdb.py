@@ -72,7 +72,7 @@ class RTDB():
                                          sig.getMaxLen()
                                          )
         print("\n"+s)
-        
+
     def pause(self):
         """Disable all signals from new appending"""
         self.pause = True
@@ -131,7 +131,7 @@ class RTDB():
                     signal = signalBase(maxHistorySize=maxSize)
                 self.addSignal(sigName, signal)
         print("Append to RTDB from file <%s>"%(filename))
-    
+
     def saveJson(self, filename) -> bool:
         """Save the RTDB structure without the data"""
         filename = addFileExtention(filename, "json")
@@ -200,7 +200,6 @@ class RTDB():
         except:
             print("Error: RTDB wasn't saved to <%s>"%(filename))
             return False
-            
 
 if __name__ == "__main__":
     #import signals
@@ -221,7 +220,7 @@ if __name__ == "__main__":
     rtdb.addSignal("state_enum",  signalDiscrete(maxHistorySize=48))
     rtdb.addSignal("bus_struct",  signalMessage(maxHistorySize=48))
     rtdb.print()
-    
+
     rtdb.resume()
     rtdb["alt_m"].append(1000.0)
     rtdb["state_enum"].append(1)
@@ -232,23 +231,23 @@ if __name__ == "__main__":
     rtdb["state_enum"].append(2)
     rtdb["message_str"].append("mid")
     time.sleep(0.1)
-    
+
     rtdb["alt_m"].append(1200.0)
     rtdb["state_enum"].append(3)
     rtdb["message_str"].append("end")
     rtdb["bus_struct"].append([1,2,3,4])
     time.sleep(0.1)
-    
+
     rtdb.print()
     rtdb.saveStateCsv("rtdb.csv")
 
     print(rtdb["message_str"].getHistory())
     print(rtdb["message_str"].getHistory(stIdx=0, endIdx=1))
-        
+
     rtdb["alt_m"].print()
     print(rtdb.getJson())
     rtdb.saveJson("rtdb_save.json")
-    
+
     rtdb = RTDB(getTime=time.time)
     rtdb.loadJson("./unitTest/rtdb_load.json")
     rtdb.print()

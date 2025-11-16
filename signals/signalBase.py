@@ -35,7 +35,7 @@ class signalBase():
         if (self._isPaused == None):
             return False
         return self._isPaused()
-        
+
     def _addValue(self, time, val) -> None:
         self.time.append(time)
         self.value.append(val)
@@ -52,9 +52,8 @@ class signalBase():
     def getHistory(self, stIdx=0, endIdx=-1):
         if endIdx == -1:
             endIdx = self.getLen()
-        #return type(self)(itertools.islice(self, stIdx, endIdx, 1))
         return list(zip(list(self.time)[stIdx:endIdx], list(self.value)[stIdx:endIdx]))
-    
+
     def getValueAtIndex(self, idx):
         return self.value.get(idx,-1)
 
@@ -78,7 +77,7 @@ class signalBase():
         ### Future value does not exist yet
         if at > self.time[-1]:
             return self.value[-1]
-        
+
         ### Too old, older than first data point
         if at < self.time[0]:
             return self.value[0]
@@ -93,7 +92,7 @@ class signalBase():
             else:
                 return self.value[i -1]
         return self.value[-1]
-        
+
     def getValueInterpolatedAtTime(self, at):
         raise NotImplementedError("Interpolation isn't implemented in the base class")
 
@@ -112,8 +111,8 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-#    if pysole:
-#        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+    if pysole:
+        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     signal = signalBase(maxHistorySize=6, getTime=time.time)
     Tst = time.time()
@@ -121,7 +120,7 @@ if __name__ == "__main__":
         signal.append(i+1)
         time.sleep(0.1)
     Tend = time.time()
-    
+
     ut.test("First element", 1, signal.getAt(Tst))
     ut.test("Last element", 4, signal.getAt(Tend))
     ut.test("Element at 0.12 sec", 2, signal.getAt(Tst +0.12))
@@ -131,6 +130,4 @@ if __name__ == "__main__":
     signal.print()
 
     print(signal.getHistory())
-    #print(hist[0])
-    #print(hist[1])
     print(signal.getHistory(stIdx=0, endIdx=1))
