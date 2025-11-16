@@ -10,6 +10,12 @@ __status__ = "Development"
 
 from collections import deque
 
+def encode(raw):
+    return raw
+
+def decode(encoded):
+    return encoded
+
 class signalBase():
     def __init__(self, maxHistorySize=32, typeName="Base", isPaused=None, getTime=None):
         self._typeName = str(typeName)
@@ -61,8 +67,15 @@ class signalBase():
         if not self.isPaused():
             self._addValue(self.getTime(), val)
 
+    def appendEncoded(self, val) -> None:
+        self.append(val)
+
     def getAt(self, at):
         return self.getValueClosestToTime(at)
+
+    def getRawAt(self, at):
+        """Return the encoded value"""
+        return self.getAt(at)
 
     def getLatest(self):
         return self.value[-1]
