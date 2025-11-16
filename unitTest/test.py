@@ -17,3 +17,16 @@ def test(title, expected, actual, tol=0):
         equ = "!="
         
     print("[%s] %s, Expected vs Actual (%1.3f %s %1.3f +/-%1.3f)"%(mark, title, expected, equ, actual, tol))
+
+class Clock():
+    def __init__(self, initSec=0.0):
+        self.sec = initSec
+
+    def time(self) -> float:
+        return self.sec
+
+    def step(self, dt):
+        self.sec += dt
+
+    def sleep(self, dt):
+        self.step(dt)

@@ -12,27 +12,12 @@ import sys, os.path
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__))))
 from signalBase import signalBase
-from processing import MuLaw
-
-##class decoder(MuLaw):
-##    def __init__(self, rawSignal):
-##        self.raw = rawSignal
-##
-##    def getAt(self, at):
-##        return
-##
-##class encoder(MuLaw):
-##    def __init__(self, rawSignal):
-##        self.raw = rawSignal
-##
-##    def append(self, val):
-##        """Encode and append to signal buffer"""
-##        return
+from processing.MuLaw import encode
+from processing.MuLaw import decode
 
 class signalAudioMulaw(signalBase):
     def __init__(self, maxHistorySize=32, isPaused=None, getTime=None):
-        super().__init__(maxHistorySize, "Discrete", isPaused, getTime)
-        self.mulaw = MuLaw.MuLaw()
+        super().__init__(maxHistorySize, "AudioMuLaw", isPaused, getTime)
 
     def printRaw(self):
         s = "Type: %s\n"%(self._typeName)
@@ -45,7 +30,7 @@ class signalAudioMulaw(signalBase):
         s = "Type: %s\n"%(self._typeName)
         s += "time | value\n"
         for i in range(len(self.time)):
-            s += "%1.3f | %1.3f\n"%(self.time[i], self.mulaw.decoder(self.value[i]))
+            s += "%1.3f | %1.3f\n"%(self.time[i], decode(self.value[i]))
         print("\n"+s)
 
     def appendEncoded(self, val) -> None:
@@ -54,7 +39,7 @@ class signalAudioMulaw(signalBase):
 
     def append(self, val) -> None:
         """Input value will be encoded and appended"""
-        self.appendEncoded( self.mulaw.encoder(val) )
+        self.appendEncoded( encode(val) )
 
     def getRawAtIndex(self, at):
         """"""
@@ -70,18 +55,18 @@ class signalAudioMulaw(signalBase):
 
     def getAtIndex(self, idx):
         """Decoded value"""
-        return self.mulaw.decoder(super().getAtIndex(idx))
+        return decode(super().getAtIndex(idx))
 
     def getAt(self, at):
         """Decoded value"""
-        return self.mulaw.decoder(super().getAt(at))
+        return decode(super().getAt(at))
 
     def getLatest(self):
         """Decoded value"""
-        return self.mulaw.decoder(super().getLatest())
+        return decode(super().getLatest())
 
 if __name__ == "__main__":
-    import importlib.util, os, sys, time
+    import importlib.util, os, sys
     mdl = ""
     path = os.path.join("../unitTest", "test.py" )
     #print(path)
@@ -98,6 +83,7 @@ if __name__ == "__main__":
 #    if pysole:
 #        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
+    time = ut.Clock(100.12)
     signal = signalAudioMulaw(maxHistorySize=32, getTime=time.time)
     Tst = time.time()
     for i in range(0,15):
@@ -108,14 +94,14 @@ if __name__ == "__main__":
         time.sleep(0.1)
     Tend = time.time()
 
-    ut.test("First element", 0, signal.getAt(Tst))
-    ut.test("Last element", 8, signal.getAt(Tend))
-    ut.test("Element at 0.12 sec", 0, signal.getAt(Tst +0.12))
-    ut.test("Element at 0.18 sec", 8, signal.getAt(Tst +0.18))
-    ut.test("Element at 0.28 sec", 8, signal.getAt(-0.22))
-    ut.test("Element at 0.3 sec",  8, signal.getAt(-0.1))
+    print(signal.getHistory())
+    print(signal.getHistory(stIdx=0, endIdx=1))
     signal.printRaw()
     signal.print()
 
-    print(signal.getHistory())
-    print(signal.getHistory(stIdx=0, endIdx=1))
+    ut.test("First element", -31373, signal.getAt(Tst))
+    ut.test("Last element", 31373, signal.getAt(Tend))
+    ut.test("Element at 0.12 sec", -16319, signal.getAt(Tst +0.12))
+    ut.test("Element at 0.18 sec", -8095, signal.getAt(Tst +0.18))
+    ut.test("Element at -0.22 sec from the latest", 16319, signal.getAt(-0.22))
+    ut.test("Element at -0.10 sec from the latest",  31373, signal.getAt(-0.1))
