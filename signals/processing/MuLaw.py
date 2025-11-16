@@ -63,6 +63,7 @@ _u = 255
 _log_u_1 = log(_u+1)
 _cClip = 32635
 _cBias = 0x84
+
 def encode(int16) -> int:
     """Returns compressed 8 bit value from 16 bit value"""
     neg = sign(int16) == -1
