@@ -15,9 +15,9 @@ from signalEncodedBase import signalEncodedBase #< The Encoded base class
 from processing.Jpeg import encode              #< The JPEG encoder
 from processing.Jpeg import decode              #< The JPEG decoder
 
-class signalAudioJpeg(signalEncodedBase):
+class signalEncodedJpeg(signalEncodedBase):
     def __init__(self, maxHistorySize=32, isPaused=None, getTime=None):
-        super().__init__(maxHistorySize, "EncodedMJpeg", isPaused, getTime)
+        super().__init__(maxHistorySize, "EncodedJpeg", isPaused, getTime)
 
     ### Overwrite to pass value through the Jpeg encoder 
     def _encode(self, raw):
@@ -71,7 +71,7 @@ if __name__ == "__main__":
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     time = ut.Clock(100.12)
-    signal = signalAudioJpeg(maxHistorySize=32, getTime=time.time)
+    signal = signalEncodedJpeg(maxHistorySize=32, getTime=time.time)
     Tst = time.time()
     for i in range(0,4):
         imgOrg = generate_image(i, height=200*2, width=320*2, channels=3)
