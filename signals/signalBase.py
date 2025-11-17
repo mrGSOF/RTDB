@@ -60,8 +60,11 @@ class signalBase():
             endIdx = self.getLen()
         return list(zip(list(self.time)[stIdx:endIdx], list(self.value)[stIdx:endIdx]))
 
-    def getValueAtIndex(self, idx):
-        return self.value.get(idx,-1)
+    def getAtIndex(self, idx):
+        try:
+            return self.value[idx]
+        except IndexError:
+            return -1
 
     def append(self, val) -> None:
         if not self.isPaused():
@@ -80,7 +83,7 @@ class signalBase():
     def getLatest(self):
         return self.value[-1]
 
-    def getValueClosestToTime(self, at):
+    def getIndexClosestToTime(self, at):
         if len(self.time) == 0:
             return -1
 
@@ -89,11 +92,11 @@ class signalBase():
 
         ### Future value does not exist yet
         if at > self.time[-1]:
-            return self.value[-1]
+            return -1
 
         ### Too old, older than first data point
         if at < self.time[0]:
-            return self.value[0]
+            return 0
 
         ### Find closest value by absolute time
         MAX_POSSIBLE_DT = self.getTime()
@@ -103,8 +106,11 @@ class signalBase():
             if dt < lastDt:
                 lastDt = dt
             else:
-                return self.value[i -1]
-        return self.value[-1]
+                return i -1
+        return -1
+
+    def getValueClosestToTime(self, at):
+        return self.value[self.getIndexClosestToTime()]
 
     def getValueInterpolatedAtTime(self, at):
         raise NotImplementedError("Interpolation isn't implemented in the base class")

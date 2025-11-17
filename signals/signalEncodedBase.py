@@ -17,12 +17,12 @@ class signalEncodedBase(signalBase):
     def __init__(self, maxHistorySize=32, name="EncodedBase", isPaused=None, getTime=None):
         super().__init__(maxHistorySize, name, isPaused, getTime)
 
-    ### The _encoder method shall change between different implemantation
+    ### The _encoder method shall change between different implementation
     def _encode(self, raw):
         """Default encoder function"""
         return raw
 
-    ### The _decoder method shall change between different implemantation
+    ### The _decoder method shall change between different implementation
     def _decode(self, encoded):
         """Default decoder function"""
         return encoded
@@ -40,6 +40,13 @@ class signalEncodedBase(signalBase):
         for i in range(len(self.time)):
             s += "%1.3f | %1.3f\n"%(self.time[i], self._decode(self.value[i]))
         print("\n"+s)
+    
+    def calcSize(self) -> int:
+        """ Calculate the size of the history in bytes """
+        size = 0
+        for i in range(len(self.value)):
+            size += self.value[i].__sizeof__()
+        return size
 
     def appendEncoded(self, val) -> None:
         """Append an encoded value"""
@@ -49,7 +56,7 @@ class signalEncodedBase(signalBase):
         """Input value will be encoded and appended"""
         self.appendEncoded( self._encode(val) )
 
-    def getRawAtIndex(self, at):
+    def getRawAtIndex(self, idx):
         """Return the encoded value at index point"""
         return super().getAtIndex(idx)
 
