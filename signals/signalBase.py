@@ -68,7 +68,11 @@ class signalBase():
 
     def append(self, val) -> None:
         if not self.isPaused():
-            self._addValue(self.getTime(), val)
+            if type(val) in (list, tuple):
+                for pair in val:
+                    self._addValue(pair[0], pair[1])
+            else:
+                self._addValue(self.getTime(), val)
 
     def appendEncoded(self, val) -> None:
         self.append(val)
@@ -110,7 +114,7 @@ class signalBase():
         return -1
 
     def getValueClosestToTime(self, at):
-        return self.value[self.getIndexClosestToTime()]
+        return self.value[self.getIndexClosestToTime(at)]
 
     def getValueInterpolatedAtTime(self, at):
         raise NotImplementedError("Interpolation isn't implemented in the base class")
@@ -130,8 +134,8 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-    if pysole:
-        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+#    if pysole:
+#        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     signal = signalBase(maxHistorySize=6, getTime=time.time)
     Tst = time.time()
@@ -150,3 +154,6 @@ if __name__ == "__main__":
 
     print(signal.getHistory())
     print(signal.getHistory(stIdx=0, endIdx=1))
+
+    signal.append(((0.5,5),(0.6,6),(0.7,7)))
+    signal.print()
