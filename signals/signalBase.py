@@ -10,12 +10,6 @@ __status__ = "Development"
 
 from collections import deque
 
-def encode(raw):
-    return raw
-
-def decode(encoded):
-    return encoded
-
 class signalBase():
     def __init__(self, maxHistorySize=32, typeName="Base", isPaused=None, getTime=None):
         self._typeName = str(typeName)
@@ -41,6 +35,16 @@ class signalBase():
         if (self._isPaused == None):
             return False
         return self._isPaused()
+
+    ### The _encoder method shall change between different implementation
+    def _encode(self, raw):
+        """Default encoder function"""
+        return raw
+
+    ### The _decoder method shall change between different implementation
+    def _decode(self, encoded):
+        """Default decoder function"""
+        return encoded
 
     def _addValue(self, time, val) -> None:
         self.time.append(time)
