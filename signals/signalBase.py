@@ -64,9 +64,13 @@ class signalBase():
             endIdx = self.getLen()
         return list(zip(list(self.time)[stIdx:endIdx], list(self.value)[stIdx:endIdx]))
 
-    def getAtIndex(self, idx):
+    def toSeconds(self, idx=0) -> float:
+        """Convert from index units to seconds"""
+        return self.time[idx-1]
+
+    def getAtIndex(self, idx=0):
         try:
-            return self.value[idx]
+            return self.value[idx-1]
         except IndexError:
             return -1
 
@@ -123,8 +127,81 @@ class signalBase():
     def getValueInterpolatedAtTime(self, at):
         raise NotImplementedError("Interpolation isn't implemented in the base class")
 
+    def isTransition(self, i=0) -> bool:
+        """Return True if the signal changes its value (edge detection)"""
+        if self.getLen() < abs(i) +1:
+            return False
+        i -= 1 #< Start from the end
+        return self.value[i] != self.value[i-1]
+
+    def isChanging(self, stepsBack=None) -> bool:
+        """Return True if the signal changes its value (edge detection)"""
+        if stepsBack == None:
+            return self.isTransition()
+        else:
+            chg = False
+            for j in range(0, stepsBack):
+                chg = chg or self.isTransition(-j)
+            return chg
+
+    def isInTolerance(self, i=0, Min=None, Max=None, Ref=None, tol=None) -> bool:
+        """Returns True if the signal is within the tolerance at index i"""
+        if (Ref != None) and (tol != None):
+            Min = Ref -tol
+            Max = Ref +tol
+
+        val = self.value[i-1]
+        if (Min != None) and (Max != None):
+            return (val > Min) and (val < Max)
+        elif Min != None:
+            return val > Min
+        elif Max != None:
+            return val < Max
+
+    def isOutOfTolerance(self, i=0, Min=None, Max=None, Ref=None, tol=None) -> bool:
+        """Returns True if the signal is within the tolerance at index i"""
+        if (Ref != None) and (tol != None):
+            Min = Ref -tol
+            Max = Ref +tol
+
+        val = self.value[i-1]
+        if (Min != None) and (Max != None):
+            return (val < Min) and (val > Max)
+        elif Min != None:
+            return val < Min
+        elif Max != None:
+            return val > Max
+
+    def isInState(self, i, value) -> bool:
+        """Returns True if the signal equal the value at this moment"""
+        return self.value[i-1] == value
+
+    def measureTimeInTolerance(self, Min, Max, maxT = None) -> float:
+        """Returns the time duration that the signal was within the tolerance (calculation is done backward in sec units)"""
+        i = 0 #< Start at last element
+        T0 = self.toSeconds(i)
+        elements = -(self.getLen() -1)
+        # maxT is the maximum time in tolerance needs to be calculated (prevents loop from running longer than needed)
+        if maxT == None:
+            maxT = T0 -self.toSeconds(elements)
+        while self.isInTolerance(i, Min, Max) and (i > elements) and ((T0 -self.toSeconds(i)) < maxT):
+            i -= 1 #< Count in reverse
+        return T0 -self.toSeconds(i) #< Duration in tolerance
+
+    def measureTimeOutOfTolerance(self, Min, Max, maxT = None) -> bool:
+        """Returns the time duration that the signal was outside the tolerance (calculation is done backward in sec units)"""
+        i = 0 #< Start at last element
+        T0 = self.toSeconds(i)
+        elements = -(self.getLen() -1)
+        # maxT is the maximum time in tolerance needs to be calculated (prevents loop from running longer than needed)
+        if maxT == None:
+            maxT = T0 -self.toSeconds(elements)
+        while self.isOutOfTolerance(i, Min, Max) and (i > elements) and ((T0 -self.toSeconds(i)) < maxT):
+            i -= 1 #< Count in reverse
+        return T0 -self.toSeconds(i) #< Duration outside of tolerance
+
 if __name__ == "__main__":
-    import importlib.util, os, sys, time
+    import importlib.util, os, sys
     mdl = ""
     path = os.path.join("../unitTest", "test.py" )
     #print(path)
@@ -138,9 +215,10 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-#    if pysole:
-#        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+    if pysole:
+        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=12)
 
+    time = ut.Clock(100.12)
     signal = signalBase(maxHistorySize=6, getTime=time.time)
     Tst = time.time()
     for i in range(4):
@@ -152,8 +230,25 @@ if __name__ == "__main__":
     ut.test("Last element", 4, signal.getAt(Tend))
     ut.test("Element at 0.12 sec", 2, signal.getAt(Tst +0.12))
     ut.test("Element at 0.18 sec", 3, signal.getAt(Tst +0.18))
-    ut.test("Element at 0.28 sec", 3, signal.getAt(-0.22))
+    ut.test("Element at 0.18 sec", 3, signal.getAt(-0.22))
     ut.test("Element at 0.3 sec",  4, signal.getAt(-0.1))
+
+    ut.test("Latest -3 element", 1, signal.getAtIndex(-3))
+    ut.test("Latest -2 element", 2, signal.getAtIndex(-2))
+    ut.test("Latest -1 element", 3, signal.getAtIndex(-1))
+    ut.test("Latest -0 element", 4, signal.getAtIndex(0))
+
+
+    ut.test("isInState(-1,3) == True", True, signal.isInState(-1,3))
+    ut.test("isInState(0,4) == True", True, signal.isInState(0,4))
+    ut.test("isInState(5) == False", False, signal.isInState(0,5))
+    ut.test("isChanging() == True", True, signal.isChanging())
+    signal.append(4)
+    ut.test("isChanging() == False", False, signal.isChanging())
+    ut.test("isChanging(3) == True", True, signal.isChanging(3))
+
+    ut.test("Duration between 5 to 2 is 0.3", 0.3, signal.measureTimeInTolerance(Min=2, Max=5, maxT=None), tol=0.01)
+    ut.test("Duration bigger than 0 0.4", 0.4, signal.measureTimeOutOfTolerance(Min=None, Max=0, maxT=None), tol=0.01)
     signal.print()
 
     print(signal.getHistory())

@@ -85,6 +85,7 @@ if __name__ == "__main__":
     ut = importlib.util.module_from_spec(spec)
     sys.modules[mdl] = ut
     spec.loader.exec_module(ut)
+    time = ut.Clock(100.12)
 
     try:
         import pysole
@@ -93,7 +94,6 @@ if __name__ == "__main__":
     if pysole:
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
-    time = ut.Clock(100.12)
     signal = signalEncodedBase(maxHistorySize=32, getTime=time.time)
     Tst = time.time()
     for i in range(0,15):

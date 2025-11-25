@@ -60,7 +60,7 @@ class signalContinuous(signalBase):
         return self.value[-1]
             
 if __name__ == "__main__":
-    import importlib.util, os, sys, time
+    import importlib.util, os, sys
     mdl = ""
     path = os.path.join("../unitTest", "test.py" )
     #print(path)
@@ -69,6 +69,7 @@ if __name__ == "__main__":
     ut = importlib.util.module_from_spec(spec)
     sys.modules[mdl] = ut
     spec.loader.exec_module(ut)
+    time = ut.Clock(100.12)
 
     try:
         import pysole
