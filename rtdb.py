@@ -214,22 +214,28 @@ if __name__ == "__main__":
         pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     rtdb = RTDB(name="DEMO", getTime=time.time)
+    array1 = np.array([[1,2], [3,4]]).astype(np.uint8)
+    array2 = np.array([[5,6], [7,8]]).astype(np.uint8)
+
     rtdb.addSignal("alt_m",       signalContinuous(maxHistorySize=48))
     rtdb.addSignal("pitch_r",     signalContinuous(maxHistorySize=48))
     rtdb.addSignal("message_str", signalMessage(maxHistorySize=48))
     rtdb.addSignal("state_enum",  signalDiscrete(maxHistorySize=48))
     rtdb.addSignal("bus_struct",  signalMessage(maxHistorySize=48))
+    rtdb.addSignal("cam",         signalNumpySharedMemory(name="cam", shape=array1.shape, dtype=np.uint8))
     rtdb.print()
 
     rtdb.resume()
     rtdb["alt_m"].append(1000.0)
     rtdb["state_enum"].append(1)
     rtdb["message_str"].append("start")
+    rtdb["cam"].append(array1)
     time.sleep(0.1)
 
     rtdb["alt_m"].append(1100.0)
     rtdb["state_enum"].append(2)
     rtdb["message_str"].append("mid")
+    rtdb["cam"].append(array2)
     time.sleep(0.1)
 
     rtdb["alt_m"].append(1200.0)

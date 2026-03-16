@@ -3,3 +3,4 @@ from .signalMessage import *
 from .signalDiscrete import *
 from .signalContinuous import *
 from .signalEncodedMulaw import *
+from .signalNumpySharedMemory import *
