@@ -3,4 +3,8 @@ from .signalMessage import *
 from .signalDiscrete import *
 from .signalContinuous import *
 from .signalEncodedMulaw import *
-from .signalNumpySharedMemory import *
+try:
+    from .signalNumpySharedMemory import *
+except:
+    signalNumpySharedMemory = signalBase
+    print("numpy not installed, signalNumpySharedMemory will not work")

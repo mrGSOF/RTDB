@@ -1,8 +1,9 @@
 {
 "name": "DEMO",
 "cam": {"type": "NumpySharedMemory", "maxSize": 1},
+"alt_m": {"type": "Continuous", "maxSize": 48},
 "pitch_r": {"type": "Continuous", "maxSize": 48},
 "message_str": {"type": "Message", "maxSize": 48},
 "state_enum": {"type": "Discrete", "maxSize": 48},
-"bus_struct": {"type": "Message", "maxSize": 48}
+"bus_struct": {"type": "Base", "maxSize": 48}
 }

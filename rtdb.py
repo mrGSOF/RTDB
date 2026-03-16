@@ -210,19 +210,25 @@ if __name__ == "__main__":
         import pysole
     except:
         pysole = False
-    if pysole:
-        pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
+    # if pysole:
+    #     pysole.probe(runRemainingCode=True, printStartupCode=False, fontSize=16)
 
     rtdb = RTDB(name="DEMO", getTime=time.time)
-    array1 = np.array([[1,2], [3,4]]).astype(np.uint8)
-    array2 = np.array([[5,6], [7,8]]).astype(np.uint8)
+    try:
+        array1 = np.array([[1,2], [3,4]]).astype(np.uint8)
+        array2 = np.array([[5,6], [7,8]]).astype(np.uint8)
+        rtdb.addSignal("cam",         signalNumpySharedMemory(name="cam", shape=array1.shape, dtype=np.uint8))
+    except:
+        print("No numpy instance found, not testing signalNumpySharedMemory")
+        array1 = [[1,2], [3,4]]
+        array2 = [[5,6], [7,8]]
+        rtdb.addSignal("cam",     signalBase(maxHistorySize=48))
 
     rtdb.addSignal("alt_m",       signalContinuous(maxHistorySize=48))
     rtdb.addSignal("pitch_r",     signalContinuous(maxHistorySize=48))
     rtdb.addSignal("message_str", signalMessage(maxHistorySize=48))
     rtdb.addSignal("state_enum",  signalDiscrete(maxHistorySize=48))
-    rtdb.addSignal("bus_struct",  signalMessage(maxHistorySize=48))
-    rtdb.addSignal("cam",         signalNumpySharedMemory(name="cam", shape=array1.shape, dtype=np.uint8))
+    rtdb.addSignal("bus_struct",  signalBase(maxHistorySize=48))
     rtdb.print()
 
     rtdb.resume()

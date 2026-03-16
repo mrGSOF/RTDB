@@ -74,11 +74,10 @@ class signalBase():
         except IndexError:
             return -1
 
-    def append(self, val) -> None:
+    def append(self, val, atTime=None) -> None:
         if not self.isPaused():
-            if type(val) in (list, tuple):
-                for pair in val:
-                    self._addValue(pair[0], pair[1])
+            if atTime != None:
+                self._addValue(atTime, val)
             else:
                 self._addValue(self.getTime(), val)
 
